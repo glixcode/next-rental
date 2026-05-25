@@ -24,7 +24,6 @@ export interface IMovie extends BaseEntity {
     description?: string;
     releaseYear?: number;
     posterUrl?: string;
-
     director?: IDirector;
     genres: IGenre[];
     actors: IActor[];

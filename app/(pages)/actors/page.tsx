@@ -4,7 +4,10 @@ import { IActor } from "@/types/movie"
 
 const ActorsPage = async () => {
   const BASE_URL = process.env.BASE_URL
-  const res = await fetch(`${BASE_URL}/api/actors`);
+  const res = await fetch(`${BASE_URL}/api/actors`,{
+    cache: 'no-store',        // or 'force-cache' if you want caching
+    next: { revalidate: 0 }
+  });
   const actors:IActor[] = await res.json();
 
   return (
