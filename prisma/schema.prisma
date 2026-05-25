@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client"
+  output   = "./generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Movie {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  releaseYear Int?
+  posterUrl   String?
+  createdAt   DateTime  @default(now())
+  directorId  Int?
+  director    Director? @relation(fields: [directorId], references: [id])
+  actors      Actor[]   @relation("ActorToMovie")
+  genres      Genre[]   @relation("GenreToMovie")
+
+  @@map("movies")
+}
+
+model Genre {
+  id        Int      @id @default(autoincrement())
+  genreName String   @unique
+  createdAt DateTime @default(now())
+  movies    Movie[]  @relation("GenreToMovie")
+
+  @@map("genres")
+}
+
+model Actor {
+  id        Int       @id @default(autoincrement())
+  firstName String
+  lastName  String
+  birthDate DateTime?
+  photoUrl  String?
+  createdAt DateTime  @default(now())
+  movies    Movie[]   @relation("ActorToMovie")
+
+  @@map("actors")
+}
+
+model Director {
+  id        Int       @id @default(autoincrement())
+  firstName String
+  lastName  String
+  birthDate DateTime?
+  createdAt DateTime  @default(now())
+  movies    Movie[]
+
+  @@map("directors")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model users {
+  id         BigInt   @id @default(autoincrement())
+  username   String?  @unique
+  password   String?
+  firstName  String?
+  lastName   String?
+  email      String?
+  photoUrl   String?
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+}
