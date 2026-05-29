@@ -23,7 +23,7 @@ export async function POST(request: Request){
         data:{
             firstName: body.firstName,
             lastName: body.lastName,
-            birthDate: body.birthDate,
+            birthDate: body.birthDate ? new Date(body.birthDate) : null,
             photoUrl: body.photoUrl
         }
     })
@@ -32,5 +32,4 @@ export async function POST(request: Request){
         return NextResponse.json({error: "Actor not created"}, {status: 500})
     
     return NextResponse.json(createdActor)
-
 }

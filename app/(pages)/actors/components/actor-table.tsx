@@ -4,8 +4,9 @@ import { useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Users, UserPlus, CalendarDays, Star, Search, Pencil, Trash2 } from "lucide-react"
 import ActorCards from "./actor-cards"
-import EditActorModal from "./edit-actor-modal"
+import ActorModal from "./actor-modal"
 import DeleteActorModal from "./delete-actor-modal"
+import { Toast } from "@/components/ui/toast"
 
 const summaryCards = [
   { label: "Total Actors", value: "1,482", change: "+18", icon: Users, color: "emerald" },
@@ -15,17 +16,28 @@ const summaryCards = [
 ]
 
 const ActorsTable = ({actors}: {actors: IActor[]}) => {
+  console.log(actors)
   const [search, setSearch] = useState("")
   const [editingActor, setEditingActor] = useState<IActor | null>(null)
   const [deletingActor, setDeletingActor] = useState<IActor | null>(null)
+  const [addNew, setAddNew] = useState(false)
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null)
   const router = useRouter()
 
-  const handleSaved = useCallback(() => {
-    router.refresh()
-  }, [router])
+  const handleSaved = useCallback(
+    (isAdd: boolean) => {
+      router.refresh()
+      setToast({
+        message: isAdd ? "Actor created successfully" : "Actor updated successfully",
+        type: "success",
+      })
+    },
+    [router]
+  )
 
   const handleDeleted = useCallback(() => {
     router.refresh()
+    setToast({ message: "Actor deleted successfully", type: "success" })
   }, [router])
 
   const filteredActors = actors.filter((actor) => {
@@ -50,6 +62,11 @@ const ActorsTable = ({actors}: {actors: IActor[]}) => {
       {/* Table - left column, fills remaining space */}
       <div className="order-2 min-w-0 flex-1 lg:order-1">
         <div className="rounded-xl border border-[#222] bg-[#242424] transition-all duration-200 hover:border-[#333] hover:shadow-lg hover:shadow-black/20">
+          <div className="border-b border-[#222] px-6 pt-4">
+            <button onClick={() => {setEditingActor(null); setAddNew(true)}} className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-sm text-white transition-all duration-200 hover:bg-emerald-400 cursor-pointer">
+              Create New
+            </button>
+          </div>
           {/* Table header with search */}
           <div className="flex flex-col gap-4 border-b border-[#222] px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -154,21 +171,32 @@ const ActorsTable = ({actors}: {actors: IActor[]}) => {
       </div>
 
       {/* Edit Modal */}
-      <EditActorModal
+      <ActorModal
         actor={editingActor}
-        isOpen={editingActor !== null}
-        onClose={() => setEditingActor(null)}
-        onSaved={handleSaved}
+        isOpen={addNew || editingActor !== null}
+        onClose={() => { setEditingActor(null); setAddNew(false) }}
+        onSaved={() => handleSaved(addNew)}
+        addNew={addNew}
       />
 
       {/* Delete Modal */}
       <DeleteActorModal
         actor={deletingActor}
         isOpen={deletingActor !== null}
-        onClose={() => setDeletingActor(null)}
+        onClose={() => {setDeletingActor(null)}}
         onDeleted={handleDeleted}
       />
     </div>
+
+    {/* Toast Notification */}
+    {toast && (
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast !== null}
+        onClose={() => setToast(null)}
+      />
+    )}
   </>
   )
 }
